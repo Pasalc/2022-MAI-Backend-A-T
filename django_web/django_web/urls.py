@@ -20,7 +20,6 @@ from picturesque import views
 urlpatterns = [
     path('',views.index,name='home'),
     path('index',views.index,name='home'),
-    re_path(r'^django/{0,1}$',views.index,name='home'),
-    re_path(r'[django/]{0,1}pictures/',views.pictures),
+    re_path(r'pictures/',views.pictures),
     path('admin/', admin.site.urls)
 ]
