@@ -2,12 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 #from django.template import loader
-
+from django.db import connection
 
 # Create your views here.
-
+def my_sql_c():
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM users')
+        row=cursor.fetchclone()
+    return row
 def index(request):
-    
     context ={
         "data":"cool and all",
         "list":[i for i in range(1,10,2)]
