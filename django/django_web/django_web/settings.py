@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'picturesque'
+    'picturesque',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +81,7 @@ DATABASES = {
         'NAME': 'duck_db',#BASE_DIR / 'db.sqlite3',
         'USER': 'duck',
         'PASSWORD': 's3cr3t',
-        'HOST':'postgre_sql',
+        'HOST':'localhost',#'postgre_sql',
         'PORT':'5432'
     }
 }

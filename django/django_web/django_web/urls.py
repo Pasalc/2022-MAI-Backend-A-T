@@ -14,12 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,re_path
+from django.urls import path
 from picturesque import views
+
+from picturesque.views import GenreViewSet, PicturesqueViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+
+router.register("api/genre", GenreViewSet, basename="genres")
+router.register("api/picturesque", PicturesqueViewSet, basename="picturesques")
 
 urlpatterns = [
     path('',views.index,name='home'),
     path('index',views.index,name='home'),
-    re_path(r'pictures/',views.pictures),
     path('admin/', admin.site.urls)
 ]
+
+urlpatterns += router.urls
+

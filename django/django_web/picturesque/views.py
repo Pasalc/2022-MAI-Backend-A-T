@@ -1,9 +1,11 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
-from django.views.decorators.csrf import csrf_exempt
-#from django.template import loader
-from django.db import connection
-from picturesque import models
+from django.shortcuts import render, get_object_or_404
+from picturesque.models import Picturesque, Genre
+from picturesque.serializers  import PicturesqueSerializer, GenreSerializer
+
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+
+import datetime
 
 # Create your views here.
 def index(request):
@@ -16,48 +18,62 @@ def index(request):
     #template = loader.get_template('django.html')
     #return HttpResponse(template.render(context, request))
 
-@csrf_exempt # разрешаем делать POST запрос без куки
-def pictures(request):
-    if request.method == "GET": # получение фильма по if
-        pic_id = request.GET.get("id", -1)
+class PicturesqueViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Picturesque.objects.all()
+        serializer = PicturesqueSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = PicturesqueSerializer(data=request.data)
+        if serializer.is_valid():
+            picturesque = Picturesque()
+            picturesque.name = serializer.validated_data["name"]
+            print(serializer.validated_data)
+            genre=serializer.validated_data["genre"]
+            picturesque.genre = Genre.objects.filter(name=genre["name"])
+            picturesque.save()
+            return Response({"status": "OK"})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        queryset = Picturesque.objects.all()
         
+        picturesque = None
         try:
-            if(pic_id == -1):
-                all_pic = models.Picturesque.objects.all()
-                return JsonResponse([{"id": picturesque.id, "name": picturesque.name, "genre": picturesque.genre.name, "date of post": picturesque.date} for picturesque in all_pic],safe=False)
-            picturesque = models.Picturesque.objects.get(id=pic_id)
-            return JsonResponse({"id": picturesque.id, "name": picturesque.name, "genre": picturesque.genre, "date of post": picturesque.date})
-        except models.Picturesque.DoesNotExist:
-            return JsonResponse({})
+            picturesque = get_object_or_404(queryset, pk=pk)
+        except:
+            pass
+        serializer = PicturesqueSerializer(picturesque)
+        return Response(serializer.data)
+    
+class GenreViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Genre.objects.all()
+        serializer = GenreSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = GenreSerializer(data=request.data)
         
-    elif request.method == "POST":
-        name = request.GET.get("name", None)
-        if not name:
-            return JsonResponse({"status": "Bad name param"})
-        genre_name = request.GET.get("genre", None).lower().replace(" ", "")
-        # Сохраняем в базу данных
+        if serializer.is_valid():
+            genre = Genre()
+            genre.name = serializer.validated_data["name"]
+            genre.save()
+            return Response({"status": "OK"})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+    def retrieve(self, request, pk=None):
+        queryset = Genre.objects.all()
+        
+        genre = None
         try:
-
-            picturesque = models.Picturesque()
-            try:
-                genre = models.Genre.objects.get(name=genre_name)
-            except models.Genre.DoesNotExis :
-                return JsonResponse({"status": "Such genre does not exist"})
-            picturesque.name = name
-            picturesque.genre = genre
-            #picturesque.date = date
-            
-            exists = True
-            try:
-                _ = models.Picturesque.objects.get(name=name, genre=genre)
-            except models.Picturesque.DoesNotExist:
-                picturesque.save()
-                return JsonResponse({"status": "OK"})
-            except models.Picturesque.MultipleObjectsReturned:
-                pass
-            return JsonResponse({"status": "Already exists"})
-        except Exception as e:
-            print(e)
-            return JsonResponse({"status": "Field error"})
-    else:
-        return HttpResponseBadRequest("<h2>Bad Request</h2>")
+            genre = get_object_or_404(queryset, pk=pk)
+        except:
+            pass
+        serializer = GenreSerializer(genre)
+        return Response(serializer.data)

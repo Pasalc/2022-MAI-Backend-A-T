@@ -10,6 +10,11 @@ def validate_positive(value):
     
 class Genre(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
+    class Meta:
+        verbose_name = "Жанр"
+        verbose_name_plural = "Жанры"
+    def __str__(self):
+        return self.name
 
 
 class Picturesque(models.Model):
