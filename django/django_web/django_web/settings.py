@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'duck_db',#BASE_DIR / 'db.sqlite3',
         'USER': 'duck',
         'PASSWORD': 's3cr3t',
-        'HOST':'127.0.0.1',
+        'HOST':'postgre_sql',
         'PORT':'5432'
     }
 }
